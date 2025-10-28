@@ -1,0 +1,94 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>クイズアプリ</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .choice { margin: 5px 0; display: block; }
+    .result, .explanation { margin-top: 20px; }
+    button { margin-top: 10px; font-size: 18px; padding: 10px 20px;}
+  </style>
+</head>
+<body>
+  <h2 id="question">読み込み中...</h2>
+  <form id="choices"></form>
+  <button onclick="checkAnswer()">解答確認</button>
+  <div class="result" id="result"></div>
+  <div class="explanation" id="explanation"></div>
+  <button onclick="prevQuestion()">前の問題へ</button>
+  <button onclick="nextQuestion()">次の問題へ</button>
+
+  <script>
+    let quizData = [];
+    let currentIndex = 0;
+    let selected = null;
+    let correctCount = 0;
+
+    fetch('quiz_data.json')
+        .then(res => res.json())
+        .then(data => {
+            quizData = data;
+            renderQuestion();
+        });
+
+    function renderQuestion() {
+        const quiz = quizData[currentIndex];
+        document.getElementById('question').textContent = quiz.question;
+        const choicesForm = document.getElementById('choices');
+        choicesForm.innerHTML = '';
+        quiz.choices.forEach((choice, index) => {
+            const label = document.createElement('label');
+            label.className = 'choice';
+            const radio = document.createElement('input');
+            radio.type = 'radio';
+            radio.name = 'choice';
+            radio.value = index + 1;
+            radio.onclick = () => selected = index + 1;
+            label.appendChild(radio);
+            label.appendChild(document.createTextNode(`${index + 1}. ${choice}`));
+            choicesForm.appendChild(label);
+        });
+        document.getElementById('result').textContent = '';
+        document.getElementById('explanation').textContent = '';
+    }
+
+    function checkAnswer() {
+        const quiz = quizData[currentIndex];
+        const result = document.getElementById('result');
+        const explanation = document.getElementById('explanation');
+
+        if (selected === quiz.answer) {
+            result.textContent = `正解は ${quiz.answer} 番です。正解です！`;
+            correctCount++;
+        } else {
+            result.textContent = `正解は ${quiz.answer} 番です。不正解です。`;
+        }
+
+        result.textContent += `　${correctCount}問正解 ／ 全${quizData.length}問`;
+        explanation.textContent = quiz.explanations.join('\n');
+    }
+
+    function nextQuestion() {
+        currentIndex++;
+        selected = null;
+        if (currentIndex < quizData.length) {
+            renderQuestion();
+        } else {
+            document.getElementById('question').textContent = 'すべての問題が終了しました。';
+            document.getElementById('choices').innerHTML = '';
+            document.getElementById('result').textContent = `最終結果：${correctCount}問正解 ／ 全${quizData.length}問`;
+            document.getElementById('explanation').textContent = '';
+        }
+    }
+
+    function prevQuestion() {
+        if (currentIndex > 0) {
+            currentIndex--;
+            selected = null;
+            renderQuestion();
+        }
+    }
+  </script>
+</body>
+</html>
