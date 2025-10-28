@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>デジタルクロック</title>
+  <style>
+    #clock {
+      font-size: 2em;
+      font-family: monospace;
+      color: darkgreen;
+      margin-top: 50px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div id="clock">--/--(-) --:-- --</div>
+
+  <script>
+    function updateClock() {
+      const now = new Date();
+      const days = ["日", "月", "火", "水", "木", "金", "土"];
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const date = String(now.getDate()).padStart(2, '0');
+      const day = days[now.getDay()];
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      const timeString = `${month}/${date}(${day}) ${hours}:${minutes} ${seconds}`;
+      document.getElementById("clock").textContent = timeString;
+    }
+
+    updateClock(); // 初回表示
+    setInterval(updateClock, 1000); // 1秒ごとに更新
+  </script>
+</body>
+</html>
+
